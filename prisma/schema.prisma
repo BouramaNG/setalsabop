@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  prenom        String   @default("")
+  nom           String   @default("")
+  prenomMere    String   @default("")
+  nomMere       String   @default("")
+  tradition     String   @default("")
+  genre         String   @default("")
+  age           String   @default("")
+  role          String   @default("user")
+  emailVerified Boolean  @default(false)
+  otpCode       String?
+  otpExpiresAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  dreams         Dream[]
+  consultations  Consultation[] @relation("UserConsultations")
+  numerologies   Numerologie[]
+  compatibilites Compatibilite[]
+  payments       Payment[]
+  credits        UserCredits?
+
+  @@map("users")
+}
+
+model Dream {
+  id             String   @id @default(cuid())
+  userId         String
+  texte          String
+  emotions       String
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interpretation Interpretation?
+  consultations  Consultation[]
+
+  @@map("dreams")
+}
+
+model Interpretation {
+  id            String   @id @default(cuid())
+  dreamId       String   @unique
+  title         String
+  summary       String
+  mainSymbols   String
+  islam         String
+  christianisme String
+  psychologie   String
+  ancestral     String
+  createdAt     DateTime @default(now())
+
+  dream         Dream    @relation(fields: [dreamId], references: [id], onDelete: Cascade)
+
+  @@map("interpretations")
+}
+
+model Marabout {
+  id            String   @id @default(cuid())
+  prenom        String
+  nom           String
+  email         String   @unique
+  telephone     String
+  ville         String
+  tradition     String
+  specialites   String
+  tarif         Int
+  whatsapp      String
+  selfie        String?
+  cin           String?
+  paymentRef    String?
+  paymentStatut String   @default("pending")
+  statut        String   @default("pending")
+  motifRejet    String?
+  rating        Float    @default(0)
+  totalAvis     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  consultations Consultation[]
+
+  @@map("marabouts")
+}
+
+model Consultation {
+  id          String   @id @default(cuid())
+  userId      String
+  maraboutId  String
+  dreamId     String?
+  message     String
+  statut      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation("UserConsultations", fields: [userId], references: [id])
+  marabout    Marabout @relation(fields: [maraboutId], references: [id])
+  dream       Dream?   @relation(fields: [dreamId], references: [id])
+
+  @@map("consultations")
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  userId        String
+  pack          String
+  montant       Int
+  credits       Int
+  reference     String?
+  statut        String    @default("pending")
+  waveLink      String
+  notifiedAdmin Boolean   @default(false)
+  validatedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model UserCredits {
+  id      String  @id @default(cuid())
+  userId  String  @unique
+  credits Int     @default(0)
+  sadaqa  Boolean @default(false)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_credits")
+}
+
+model Numerologie {
+  id                 String   @id @default(cuid())
+  userId             String
+  nomComplet         String
+  dateNaissance      String
+  systeme            String   @default("occidental")
+  cheminDeVie        Int
+  nombreAme          Int
+  nombreExpression   Int
+  nombrePersonnalite Int
+  anneePersonnelle   Int
+  rapport            String
+  createdAt          DateTime @default(now())
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("numerologies")
+}
+
+model Compatibilite {
+  id             String   @id @default(cuid())
+  userId         String
+  nomPersonne1   String
+  nomMere1       String
+  dateNaissance1 String?
+  nomPersonne2   String
+  nomMere2       String
+  dateNaissance2 String?
+  systeme        String   @default("occidental")
+  scoreTotal     Int
+  rapport        String
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("compatibilites")
+}
