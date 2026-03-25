@@ -17,6 +17,7 @@ const traditions = [
 const STEPS = ["Compte", "Vérification", "Tradition", "Profil"];
 
 export default function OnboardingPage({ onComplete }: OnboardingProps) {
+  const [mode, setMode] = useState<"register" | "login">("register");
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,6 +56,29 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
       if (!res.ok) return setError(data.error);
       setStep(1);
       startResendCooldown();
+    } catch {
+      setError("Erreur réseau, réessaye.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Connexion ──────────────────────────────────────────────────────
+  const handleLogin = async () => {
+    setError("");
+    if (!email.includes("@")) return setError("Email invalide");
+    if (password.length < 6) return setError("Mot de passe trop court");
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.error || "Email ou mot de passe incorrect");
+      onComplete(data.user);
     } catch {
       setError("Erreur réseau, réessaye.");
     } finally {
@@ -152,7 +176,8 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
   };
 
   const handleNext = () => {
-    if (step === 0) handleRegister();
+    if (step === 0 && mode === "login") handleLogin();
+    else if (step === 0) handleRegister();
     else if (step === 1) handleVerifyOTP();
     else if (step === 2) setStep(3);
     else if (step === 3) handleCompleteProfile();
@@ -212,12 +237,31 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
             {/* ── Step 0 — Email + Password ── */}
             {step === 0 && (
               <div>
+                {/* Toggle Inscription / Connexion */}
+                <div className="flex rounded-xl p-1 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <button
+                    onClick={() => { setMode("register"); setError(""); }}
+                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{ background: mode === "register" ? "linear-gradient(135deg,#F4C842,#E8A020)" : "transparent", color: mode === "register" ? "#0D0B2B" : "#9B8FC2" }}
+                  >
+                    S&apos;inscrire
+                  </button>
+                  <button
+                    onClick={() => { setMode("login"); setError(""); }}
+                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{ background: mode === "login" ? "linear-gradient(135deg,#F4C842,#E8A020)" : "transparent", color: mode === "login" ? "#0D0B2B" : "#9B8FC2" }}
+                  >
+                    Se connecter
+                  </button>
+                </div>
                 <div className="text-center mb-6">
-                  <div className="text-5xl mb-3">✨</div>
+                  <div className="text-5xl mb-3">{mode === "login" ? "🔑" : "✨"}</div>
                   <h2 className="font-bold text-2xl mb-2" style={{ fontFamily: "Sora, sans-serif" }}>
-                    Créer ton compte <span className="text-gradient-gold">DreamInsight</span>
+                    {mode === "login" ? "Content de te revoir" : "Créer ton compte"} <span className="text-gradient-gold">SetalSaBOP</span>
                   </h2>
-                  <p style={{ color: "#9B8FC2", fontSize: "14px" }}>Un code de vérification sera envoyé sur ton email</p>
+                  <p style={{ color: "#9B8FC2", fontSize: "14px" }}>
+                    {mode === "login" ? "Connecte-toi à ton compte" : "Un code de vérification sera envoyé sur ton email"}
+                  </p>
                 </div>
                 <div className="space-y-4">
                   <div>
