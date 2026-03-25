@@ -26,7 +26,7 @@ const SPECIALITES_LIST = [
 ];
 const WAVE_LINK = "https://pay.wave.com/m/M_sn_OrBEDgUMGWxY/c/sn/?amount=2500";
 
-export default function MaraboutSignupPage() {
+export default function MaraboutSignupPage({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const [step, setStep] = useState<Step>("infos");
 
   // Formulaire
