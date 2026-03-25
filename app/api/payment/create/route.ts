@@ -38,17 +38,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Email admin
-    try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: false,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        tls: { rejectUnauthorized: false },
-      });
+    // Email admin — envoi en arrière-plan sans bloquer la réponse
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "465"),
+      secure: parseInt(process.env.SMTP_PORT || "465") === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      tls: { rejectUnauthorized: false },
+    });
 
-      await transporter.sendMail({
+    transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: ADMIN_EMAIL,
         subject: `💰 Nouveau paiement en attente — ${p.label} (${p.montant} FCFA)`,
@@ -68,9 +67,7 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       });
-    } catch (emailErr) {
-      console.error("Email admin failed:", emailErr);
-    }
+    }).catch((emailErr) => console.error("Email admin failed:", emailErr));
 
     return NextResponse.json({ paymentId: payment.id, waveLink, montant: p.montant, pack: p.label });
 
