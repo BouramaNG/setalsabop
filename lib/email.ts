@@ -1,9 +1,10 @@
 import nodemailer from "nodemailer";
 
+const port = Number(process.env.SMTP_PORT) || 465;
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false, // STARTTLS sur 587
+  port,
+  secure: port === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -22,12 +23,12 @@ export async function sendOTPEmail(email: string, otp: string, name?: string) {
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
     to: email,
-    subject: "Votre code de vérification DreamInsight",
+    subject: "Votre code de vérification SetalSaBOP",
     html: `
       <div style="font-family: 'Inter', Arial, sans-serif; background: #06041A; color: #F0EDF8; padding: 40px; border-radius: 16px; max-width: 480px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 28px; color: #F4C842; margin: 0;">✨ SamaDream</h1>
-          <p style="color: #9B8FC2; margin-top: 8px;">Plateforme d'interprétation de rêves</p>
+          <h1 style="font-size: 28px; color: #F4C842; margin: 0;">✨ SetalSaBOP</h1>
+          <p style="color: #9B8FC2; margin-top: 8px;">La Voyance autrement !</p>
         </div>
 
         <p style="font-size: 16px; margin-bottom: 8px;">
