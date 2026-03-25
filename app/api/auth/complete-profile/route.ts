@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     await prisma.userCredits.upsert({
       where: { userId: updated.id },
       update: {},
-      create: { userId: updated.id, credits: 3, sadaqa: false },
+      create: { userId: updated.id, credits: 1, sadaqa: false },
     });
 
     return NextResponse.json({ success: true, user: updated });
