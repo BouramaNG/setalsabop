@@ -48,25 +48,24 @@ export async function POST(req: NextRequest) {
     });
 
     transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: ADMIN_EMAIL,
-        subject: `💰 Nouveau paiement en attente — ${p.label} (${p.montant} FCFA)`,
-        html: `
-          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-            <h2 style="color:#F4C842">🌙 SetalSaBOP — Nouveau Paiement</h2>
-            <table style="width:100%;border-collapse:collapse">
-              <tr><td style="padding:8px;color:#666">Utilisateur</td><td style="padding:8px;font-weight:bold">${user.prenom} ${user.nom}</td></tr>
-              <tr><td style="padding:8px;color:#666">Email</td><td style="padding:8px">${user.email}</td></tr>
-              <tr><td style="padding:8px;color:#666">Pack</td><td style="padding:8px;font-weight:bold">${p.label}</td></tr>
-              <tr><td style="padding:8px;color:#666">Montant</td><td style="padding:8px;color:#F4C842;font-weight:bold">${p.montant} FCFA</td></tr>
-              <tr><td style="padding:8px;color:#666">Crédits</td><td style="padding:8px">${p.credits} crédits</td></tr>
-              <tr><td style="padding:8px;color:#666">ID Paiement</td><td style="padding:8px;font-size:12px;color:#999">${payment.id}</td></tr>
-            </table>
-            <p style="color:#666;margin-top:20px">⏳ En attente de la référence Wave de l'utilisateur.</p>
-            <p style="color:#999;font-size:12px">Connectez-vous à l'espace admin pour valider.</p>
-          </div>
-        `,
-      });
+      from: process.env.SMTP_FROM,
+      to: ADMIN_EMAIL,
+      subject: `💰 Nouveau paiement en attente — ${p.label} (${p.montant} FCFA)`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+          <h2 style="color:#F4C842">🌙 SetalSaBOP — Nouveau Paiement</h2>
+          <table style="width:100%;border-collapse:collapse">
+            <tr><td style="padding:8px;color:#666">Utilisateur</td><td style="padding:8px;font-weight:bold">${user.prenom} ${user.nom}</td></tr>
+            <tr><td style="padding:8px;color:#666">Email</td><td style="padding:8px">${user.email}</td></tr>
+            <tr><td style="padding:8px;color:#666">Pack</td><td style="padding:8px;font-weight:bold">${p.label}</td></tr>
+            <tr><td style="padding:8px;color:#666">Montant</td><td style="padding:8px;color:#F4C842;font-weight:bold">${p.montant} FCFA</td></tr>
+            <tr><td style="padding:8px;color:#666">Crédits</td><td style="padding:8px">${p.credits} crédits</td></tr>
+            <tr><td style="padding:8px;color:#666">ID Paiement</td><td style="padding:8px;font-size:12px;color:#999">${payment.id}</td></tr>
+          </table>
+          <p style="color:#666;margin-top:20px">⏳ En attente de la référence Wave de l'utilisateur.</p>
+          <p style="color:#999;font-size:12px">Connectez-vous à l'espace admin pour valider.</p>
+        </div>
+      `,
     }).catch((emailErr) => console.error("Email admin failed:", emailErr));
 
     return NextResponse.json({ paymentId: payment.id, waveLink, montant: p.montant, pack: p.label });
